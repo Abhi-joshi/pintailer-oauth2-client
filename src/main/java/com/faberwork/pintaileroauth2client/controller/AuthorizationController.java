@@ -65,17 +65,17 @@ public class AuthorizationController {
     }
 
     @GetMapping(value = "/authorize", params = "grant_type=client_credentials")
-    public String clientCredentialsGrant(Model model) {
+    public Mono<String> clientCredentialsGrant(Model model) {
 
-        String[] messages = this.webClient
+        return this.webClient
                 .get()
-                .uri(this.messagesBaseUri)
+                .uri(this.messagesBaseUri + "/messages")
                 .attributes(clientRegistrationId("messaging-client-client-credentials"))
                 .retrieve()
                 .bodyToMono(String[].class)
-                .block();
-        model.addAttribute("messages", messages);
-
-        return "index";
+                .map(res -> {
+                    model.addAttribute("messages", res);
+                    return "index";
+                });
     }
 }
